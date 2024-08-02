@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import numpy as np
 import base64
 
-
+#set_page_config
 st.set_page_config(
     page_title="Breast Cancer Predictor",
     page_icon=":female-doctor:",
@@ -13,33 +13,24 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-
-
-
-
-
-
-
-#CSS **************************************************************************************
-
-
-
-
-
-# Kendi yerel dosyanızın yolu
+# Image path
 image_path = "data/img2.jpg"
 
-# Resmi base64 formatına dönüştürme
+
+# Converting image to base64 format
 def get_base64_of_bin_file(file_path):
     with open(file_path, "rb") as f:
         data = f.read()
     return base64.b64encode(data).decode()
 
-# Base64 formatında resim elde edin
+
 base64_image = get_base64_of_bin_file(image_path)
 
 
-# Arka planı ayarlama
+
+#CSS **************************************************************************************
+
+# Background
 page_bg_img = f"""
 <style>
 [data-testid="stAppViewContainer"] > .main {{
@@ -65,23 +56,8 @@ st.markdown(page_bg_img, unsafe_allow_html=True)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #MAIN CODE
 def main():
-
     input_data = add_sidebar()
 
     with st.container():
@@ -106,8 +82,7 @@ def main():
         add_predictions(input_data)
 
 
-
-
+#Cleaning the data
 def get_clean_data():
     data = pd.read_csv('data/data.csv')
     data.drop(['Unnamed: 32', 'id'], axis=1, inplace=True)
@@ -115,6 +90,7 @@ def get_clean_data():
     return data
 
 
+#Adding the sidebar to left side of the app
 def add_sidebar():
     st.sidebar.header("Çekirdek Ölçüm Değerleri")
 
@@ -156,7 +132,6 @@ def add_sidebar():
     input_dict = {}
 
     for label, key in slider_labels:
-
         input_dict[key] = st.sidebar.slider(
             label,
             min_value=float(0),
@@ -167,6 +142,7 @@ def add_sidebar():
     return input_dict
 
 
+#Scaling the values for training
 def get_scaled_values(input_dict):
     data = get_clean_data()
 
@@ -182,6 +158,7 @@ def get_scaled_values(input_dict):
     return scaled_dict
 
 
+#Radar Chart for Visualization
 def get_radar_chart(input_data):
     input_data = get_scaled_values(input_data)
 
@@ -230,29 +207,26 @@ def get_radar_chart(input_data):
             radialaxis=dict(
                 visible=True,
                 range=[0, 1],
-                tickfont = dict(size=8, family = "Arial, sans-serif", color= "black", weight = "bold"),
+                tickfont=dict(size=8, family="Arial, sans-serif", color="black", weight="bold"),
             ),
-            angularaxis = dict(
-                tickfont = dict(size=18, family = "Arial, sans-serif",color = "black", weight ="bold")
+            angularaxis=dict(
+                tickfont=dict(size=18, family="Arial, sans-serif", color="black", weight="bold")
             )
         ),
         showlegend=True,
-        #ARKA PLANI SEFFAF YAPTIK
-        plot_bgcolor = 'rgba(0, 0, 0, 0)',
-        paper_bgcolor = 'rgba(0, 0, 0, 0)',
-        legend = dict(
-            font = dict(size = 20),
-            itemsizing = 'constant'
+        plot_bgcolor='rgba(0, 0, 0, 0)',
+        paper_bgcolor='rgba(0, 0, 0, 0)',
+        legend=dict(
+            font=dict(size=20),
+            itemsizing='constant'
         )
-
-
 
     )
 
     return fig
 
 
-
+#Model Predict
 def add_predictions(input_data):
     model = pickle.load(open("model/model.pkl", "rb"))
     scaler = pickle.load(open("model/scaler.pkl", "rb"))
@@ -264,7 +238,7 @@ def add_predictions(input_data):
     prediction = model.predict(input_array_scaled)
 
     st.markdown("<h2 style = 'font-size:28px; font-weight:bold;'>Kanser Hücresi Durumu</h2> ", unsafe_allow_html=True)
-    st.write("<p style='font-size:18px; font-weight:bold;'>Hücrenin Değerlere Göre Durumu ",unsafe_allow_html=True)
+    st.write("<p style='font-size:18px; font-weight:bold;'>Hücrenin Değerlere Göre Durumu ", unsafe_allow_html=True)
 
     if prediction[0] == 0:
         st.markdown("<p style='font-size:20px; font-weight:bold; color:green; background-color: #d6d6d6; "
@@ -277,8 +251,12 @@ def add_predictions(input_data):
 
     # st.write(prediction)
 
-    st.markdown("<p style='font-size:18px; font-weight:bold;'>Verilen Değerlere göre İyi olma oranı: {:.2f}%</p>".format((model.predict_proba(input_array_scaled)[0][0])*100), unsafe_allow_html=True)
-    st.markdown("<p style='font-size:18px; font-weight:bold;'>Verilen Değerlere göre Kötü olma oranı: {:.2f}%</p>".format(model.predict_proba(input_array_scaled)[0][1]*100), unsafe_allow_html=True)
+    st.markdown(
+        "<p style='font-size:18px; font-weight:bold;'>Verilen Değerlere göre İyi olma oranı: {:.2f}%</p>".format(
+            (model.predict_proba(input_array_scaled)[0][0]) * 100), unsafe_allow_html=True)
+    st.markdown(
+        "<p style='font-size:18px; font-weight:bold;'>Verilen Değerlere göre Kötü olma oranı: {:.2f}%</p>".format(
+            model.predict_proba(input_array_scaled)[0][1] * 100), unsafe_allow_html=True)
 
     st.markdown(
         "<p style='font-size:18px; font-weight:bold;'>Bu uygulama tıp uzmanlarına teşhis koymada yardımcı olabilir ancak profesyonel teşhisin yerine kullanılmamalıdır.</p>",
